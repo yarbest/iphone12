@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
 
+        //данный url написан относитель html, так как браузер будет делать запрос на сервер
         getData('cross-sell-dbase/dbase.json', handleResponse);
     };
 
