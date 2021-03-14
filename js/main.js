@@ -224,11 +224,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             });
 
-            if (responseWithGoods.length - 4 < 0) btnShowMore.remove(); //если товаров больше нет, то кнопку убираем
             for (let i = 0; i < goodsInRow; i++) {
-                //Удаляем показанные товары
+                //Удаляем те товары, которые показали
                 responseWithGoods.shift();
             }
+            if (responseWithGoods.length <= 0) btnShowMore.remove(); //если товаров больше нет, то кнопку убираем
         };
 
         //ВАЖНО эта функця будет передаваться колбэком в функцию для запроса на сервер (getData),
@@ -247,5 +247,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         getData('cross-sell-dbase/dbase.json', handleResponse);
     };
-    renderCrossSell(4);
+
+    if (window.innerWidth < 937) {
+        console.log(window.innerWidth);
+        renderCrossSell(6);
+    } else {
+        renderCrossSell(4);
+    }
 });
