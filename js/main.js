@@ -199,15 +199,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     openCloseModal();
 
-    const renderCrossSell = (goodsInRow) => {
+    const renderCrossSell = () => {
         const crossSellList = document.querySelector('.cross-sell__list');
         const btnShowMore = document.createElement('button');
         btnShowMore.classList.add('show-more');
         btnShowMore.textContent = 'Показать еще';
 
-        const fillSellList = (responseWithGoods) => {
+        const fillSellList = (responseWithGoods, amountGoodsToAdd) => {
             responseWithGoods.forEach((objectWithGoodInfo, i) => {
-                if (i >= goodsInRow) return; //больше этого количества товаров в строке не показывать
+                if (i >= amountGoodsToAdd) return; //больше этого количества товаров за один раз не добавлять
 
                 crossSellList.insertAdjacentHTML(
                     'beforeend',
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             });
 
-            for (let i = 0; i < goodsInRow; i++) {
+            for (let i = 0; i < amountGoodsToAdd; i++) {
                 //Удаляем те товары, которые показали
                 responseWithGoods.shift();
             }
@@ -234,24 +234,21 @@ document.addEventListener('DOMContentLoaded', () => {
         //ВАЖНО эта функця будет передаваться колбэком в функцию для запроса на сервер (getData),
         //и будет вызываться там, там ей в параметр передадут ответ от сервера с данными о товарах
         const handleResponse = (responseWithGoods) => {
+            const amountGoodsToAdd = window.innerWidth < 937 ? 6 : 4; //в зависимости от ширины устройства, определяется колво товаров при добавлении
+
             responseWithGoods.sort(() => Math.random() - 0.5); //перемешиваем массив результатов
 
-            fillSellList(responseWithGoods);
+            fillSellList(responseWithGoods, amountGoodsToAdd); //выводим первую порцию товаров
 
-            crossSellList.insertAdjacentElement('afterend', btnShowMore);
+            crossSellList.insertAdjacentElement('afterend', btnShowMore); //показываем кнопку только после загрузки первой партии товаров
 
             btnShowMore.addEventListener('click', () => {
-                fillSellList(responseWithGoods);
+                fillSellList(responseWithGoods, amountGoodsToAdd); //при каждом клике выводится новая партия товаров
             });
         };
 
         getData('cross-sell-dbase/dbase.json', handleResponse);
     };
 
-    if (window.innerWidth < 937) {
-        console.log(window.innerWidth);
-        renderCrossSell(6);
-    } else {
-        renderCrossSell(4);
-    }
+    renderCrossSell();
 });
