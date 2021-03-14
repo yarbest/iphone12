@@ -199,29 +199,16 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     openCloseModal();
 
-    const renderCrossSell = () => {
+    const renderCrossSell = (goodsInRow) => {
         const crossSellList = document.querySelector('.cross-sell__list');
+        const btnShowMore = document.createElement('button');
+        btnShowMore.classList.add('show-more');
+        btnShowMore.textContent = 'Показать еще';
 
-        //ВАЖНО эта функця будет передаваться колбэком в функцию для запроса на сервер (getData),
-        //и будет вызываться там, там ей в параметр передадут ответ от сервера с данными о товарах
-        const fillCrossSellList = (responseWithGoods) => {
-            let listWithRandomIndexes = [];
-            //чисел должно быть столько, сколько объектов в responseWithGoods
-            for (let i = 0; i < responseWithGoods.length; i++) {
-                listWithRandomIndexes.push(i);
-            }
-            listWithRandomIndexes.sort(() => Math.random() - 0.5);
-            console.log(listWithRandomIndexes);
+        const fillSellList = (responseWithGoods) => {
+            responseWithGoods.forEach((objectWithGoodInfo, i) => {
+                if (i >= goodsInRow) return; //больше этого количества товаров в строке не показывать
 
-            //responseWithGoods - массив объектов с инфой о товарах, полученный от сервера
-            responseWithGoods.forEach((item, i) => {
-                //Например у нас listWithRandomIndexes получился таким:
-                //[2, 5, 1, 0, 3, 4, 7, 6, 9, 10, 8, 11, 12]
-                //в i у нас по очереди перебираются индексы из массива responseWithGoods от 0 до 12
-                //поэтому запись listWithRandomIndexes[i] сначала вернет нам 2, затем 5, затем 1 и т.д.
-                //и затем, одно из этих чисел подставится в responseWithGoods[наш_индекс]
-                //и так мы получим случайный объект
-                let objectWithGoodInfo = responseWithGoods[listWithRandomIndexes[i]];
                 crossSellList.insertAdjacentHTML(
                     'beforeend',
                     `
@@ -236,8 +223,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     `
                 );
             });
+
+            if (responseWithGoods.length - 4 < 0) btnShowMore.remove(); //если товаров больше нет, то кнопку убираем
+            for (let i = 0; i < goodsInRow; i++) {
+                //Удаляем показанные товары
+                responseWithGoods.shift();
+            }
         };
-        getData('cross-sell-dbase/dbase.json', fillCrossSellList);
+
+        //ВАЖНО эта функця будет передаваться колбэком в функцию для запроса на сервер (getData),
+        //и будет вызываться там, там ей в параметр передадут ответ от сервера с данными о товарах
+        const handleResponse = (responseWithGoods) => {
+            responseWithGoods.sort(() => Math.random() - 0.5); //перемешиваем массив результатов
+
+            fillSellList(responseWithGoods);
+
+            crossSellList.insertAdjacentElement('afterend', btnShowMore);
+
+            btnShowMore.addEventListener('click', () => {
+                fillSellList(responseWithGoods);
+            });
+        };
+
+        getData('cross-sell-dbase/dbase.json', handleResponse);
     };
-    renderCrossSell();
+    renderCrossSell(4);
 });

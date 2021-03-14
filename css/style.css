@@ -509,6 +509,16 @@ ul {
     line-height: 32px;
 }
 
+.show-more {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 30px;
+    color: #fff;
+    font-weight: 700;
+    background-color: rgb(251, 37, 37);
+    border: none;
+}
+
 @media (max-width: 968px) {
     .cross-sell__list {
         max-width: 560px;
