@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const getData = (url, callback) => {
+    //Способ через XMLHttpRequest
+    /*const getData = (url, callback) => {
         const request = new XMLHttpRequest();
         request.open('GET', url);
         request.send();
@@ -10,6 +11,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(new Error(`Данные не были получены, ошибка: ${request.status} ${request.statusText}`));
             }
         });
+    };*/
+
+    const getData = (url, callback) => {
+        fetch(url)
+            .then((response) => {
+                if (response.ok) return response.json();
+                throw new Error(response.statusText);
+            })
+            .then((processedResponse) => callback(processedResponse)) //можно написать просто .then(callback), так бы ему все равно передались аргументы
+            .catch((err) => console.error(err));
     };
 
     const changeTab = () => {
@@ -203,10 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const crossSellList = document.querySelector('.cross-sell__list');
         const btnShowMore = document.createElement('button');
         btnShowMore.classList.add('show-more');
+        btnShowMore.classList.add('button');
         btnShowMore.textContent = 'Показать еще';
 
-        const fillSellList = (responseWithGoods, amountGoodsToAdd) => {
-            responseWithGoods.forEach((objectWithGoodInfo, i) => {
+        const fillSellList = (arrWithRandomGoods, amountGoodsToAdd) => {
+            arrWithRandomGoods.forEach((objectWithGoodInfo, i) => {
                 if (i >= amountGoodsToAdd) return; //больше этого количества товаров за один раз не добавлять
 
                 crossSellList.insertAdjacentHTML(
@@ -224,32 +236,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
             });
 
-            for (let i = 0; i < amountGoodsToAdd; i++) {
-                //Удаляем те товары, которые показали
-                responseWithGoods.shift();
-            }
-            if (responseWithGoods.length <= 0) btnShowMore.remove(); //если товаров больше нет, то кнопку убираем
+            //Удаляем из массива те товары, которые показали
+            //так как массивы передаются в функцию по ссылке, то если изменить этот массив внутри функции, то изменения затронут исходный массив
+            arrWithRandomGoods.splice(0, amountGoodsToAdd);
+
+            if (arrWithRandomGoods.length <= 0) btnShowMore.remove(); //если товаров больше нет, то кнопку убираем
         };
 
         //ВАЖНО эта функця будет передаваться колбэком в функцию для запроса на сервер (getData),
         //и будет вызываться там, там ей в параметр передадут ответ от сервера с данными о товарах
         const handleResponse = (responseWithGoods) => {
-            const amountGoodsToAdd = window.innerWidth < 937 ? 6 : 4; //в зависимости от ширины устройства, определяется колво товаров при добавлении
+            const arrWithRandomGoods = [...responseWithGoods]; //копируем массив
 
-            responseWithGoods.sort(() => Math.random() - 0.5); //перемешиваем массив результатов
+            const amountGoodsToAdd = window.innerWidth > 459 && window.innerWidth < 937 ? 6 : 4; //в зависимости от ширины устройства, определяется колво товаров при добавлении
 
-            fillSellList(responseWithGoods, amountGoodsToAdd); //выводим первую порцию товаров
+            arrWithRandomGoods.sort(() => Math.random() - 0.5); //перемешиваем массив с данными
+
+            fillSellList(arrWithRandomGoods, amountGoodsToAdd); //выводим первую порцию товаров
 
             crossSellList.insertAdjacentElement('afterend', btnShowMore); //показываем кнопку только после загрузки первой партии товаров
 
             btnShowMore.addEventListener('click', () => {
-                fillSellList(responseWithGoods, amountGoodsToAdd); //при каждом клике выводится новая партия товаров
+                fillSellList(arrWithRandomGoods, amountGoodsToAdd); //при каждом клике выводится новая партия товаров
             });
         };
 
         //данный url написан относитель html, так как браузер будет делать запрос на сервер
         getData('cross-sell-dbase/dbase.json', handleResponse);
     };
-
     renderCrossSell();
+
+    amenu('.header__menu', '.header-menu__list', '.header-menu__item', '.header-menu__burger');
 });

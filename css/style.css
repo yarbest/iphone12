@@ -473,9 +473,9 @@ ul {
 
     /* justify-content: space-between; */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 30px;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     align-items: stretch;
 }
 
@@ -518,23 +518,18 @@ ul {
 .show-more {
     display: block;
     margin: 0 auto;
-    padding: 10px 30px;
-    color: #fff;
+
     font-weight: 700;
-    background-color: rgb(251, 37, 37);
-    border: none;
+    transition: 0.5s;
+}
+
+.show-more:hover {
+    background-color: #fe3b3b;
+    color: white;
+    border-color: #fe3b3b;
 }
 
 @media (max-width: 968px) {
-    .cross-sell__list {
-        /* max-width: 560px; */
-        /* justify-content: center; */
-        /* margin: 0 auto; */
-    }
-
-    .cross-sell__item {
-        /* margin: 0 30px 30px; */
-    }
 }
 
 .modal {
